@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import morgan from 'morgan';
 import helmet from 'helmet';
-import AuthenticationService from './AuthenticationService';
+import authenticationService from './AuthenticationService';
 require('dotenv').config();
 
 const app = express();
@@ -39,11 +39,11 @@ app.post('/auth/2fa/generate', (req: Request, res: Response) => {
   if (!user) {
     return res.status(404).json({message: 'not found user'});
   }
-  const userCode = AuthenticationService.getTwoFactorAuthenticationCode();
+  const userCode = authenticationService.getTwoFactorAuthenticationCode();
   user.url2fa = userCode.otpauthUrl || '';
   user.twoFactorAuthenticationCode = userCode.base32;
 
-  return AuthenticationService.respondWithQRCode(user.url2fa, res);
+  return authenticationService.respondWithQRCode(user.url2fa, res);
 })
 
 app.post('/auth/2fa/activate', (req: Request, res: Response) => {
@@ -53,7 +53,7 @@ app.post('/auth/2fa/activate', (req: Request, res: Response) => {
     return res.status(404).json({message: 'user not found'});
   }
 
-  AuthenticationService.verify2Fa(user, req.body.token);
+  authenticationService.verify2Fa(user, req.body.token);
   return res.status(200).send();
 });
 
@@ -66,7 +66,7 @@ app.post('/auth/2fa/authenticate', (req: Request, res: Response) => {
     return res.status(404).json({message: 'user not found'});
   }
 
-  AuthenticationService.verify2Fa(user, req.body.token); 
+  authenticationService.verify2Fa(user, req.body.token); 
 
   return res.status(200).json(
     {
